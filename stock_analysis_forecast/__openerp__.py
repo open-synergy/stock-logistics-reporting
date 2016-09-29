@@ -17,5 +17,6 @@
     ],
     'data': [
         'views/report_stock_forecast.xml',
+        'security/ir.model.access.csv',
     ],
 }
