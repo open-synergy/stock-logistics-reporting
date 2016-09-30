@@ -48,7 +48,7 @@ class ReportStockForecast(models.Model):
             MIN(sq.id) AS id,
             sq.product_id,
             date_trunc(
-                'week',
+                'day',
                 to_date(to_char(CURRENT_DATE, 'YYYY/MM/DD'),
                 'YYYY/MM/DD')) AS date,
             SUM(sq.qty) AS product_qty,
@@ -68,15 +68,10 @@ class ReportStockForecast(models.Model):
             SELECT
             MIN(-sm.id) AS id,
             sm.product_id,
-            CASE WHEN sm.date_expected > CURRENT_DATE
-            THEN date_trunc(
-                'week',
+            date_trunc(
+                'day',
                 to_date(to_char(sm.date_expected, 'YYYY/MM/DD'),
                 'YYYY/MM/DD'))
-            ELSE date_trunc(
-                'week',
-                to_date(
-                    to_char(CURRENT_DATE, 'YYYY/MM/DD'), 'YYYY/MM/DD')) END
             AS date,
             0 AS product_qty,
             SUM(sm.product_qty) AS in_quantity,
@@ -101,15 +96,10 @@ class ReportStockForecast(models.Model):
             SELECT
                 MIN(-sm.id) AS id,
                 sm.product_id,
-                CASE WHEN sm.date_expected > CURRENT_DATE
-                    THEN date_trunc(
-                        'week',
+                date_trunc(
+                        'day',
                         to_date(to_char(sm.date_expected, 'YYYY/MM/DD'),
                         'YYYY/MM/DD'))
-                    ELSE date_trunc(
-                        'week',
-                        to_date(to_char(CURRENT_DATE, 'YYYY/MM/DD'),
-                        'YYYY/MM/DD')) END
                 AS date,
                 0 AS product_qty,
                 0 AS in_quantity,
@@ -135,10 +125,10 @@ class ReportStockForecast(models.Model):
      (SELECT DISTINCT date
       FROM
       (
-             SELECT date_trunc('week', CURRENT_DATE) AS DATE
+             SELECT date_trunc('day', CURRENT_DATE) AS DATE
              UNION ALL
              SELECT date_trunc(
-                'week',
+                'day',
                 to_date(to_char(sm.date_expected, 'YYYY/MM/DD'),
                 'YYYY/MM/DD')) AS date
              FROM stock_move sm
@@ -150,7 +140,6 @@ class ReportStockForecast(models.Model):
                 ON sm.location_dest_id = dest_location.id
              WHERE
              sm.state IN ('confirmed','assigned','waiting') AND
-             sm.date_expected > CURRENT_DATE AND
              ((dest_location.usage = 'internal'
               AND source_location.usage != 'internal')
               OR (source_location.usage = 'internal'
